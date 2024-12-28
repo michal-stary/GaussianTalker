@@ -24,6 +24,7 @@ from arguments import ModelParams, PipelineParams, get_combined_args, ModelHidde
 from gaussian_renderer import GaussianModel
 import concurrent.futures
 from torch.utils.data import DataLoader
+import shutil
 
 def multithread_write(image_list, path):
     executor = concurrent.futures.ThreadPoolExecutor(max_workers=None)
@@ -147,6 +148,10 @@ def render_set(model_path, name, iteration, scene, gaussians, pipeline,audio_dir
     cmd = f'ffmpeg -loglevel quiet -y -i {render_path}/cam.mp4 -i {inf_audio_dir} -c:v copy -c:a aac {render_path}/{model_path.split("/")[-2]}_{name}_{iteration}iter_cam.mov'
     os.system(cmd)
     
+    if args.result_dir:
+        cmd = f"ffmpeg -loglevel quiet -y -i {render_path}/renders.mp4 -i {inf_audio_dir} -c:v copy -c:a aac {args.result_dir}/rendered_{args.custom_wav.split('/')[-1].split('.')[0]}.mov"
+        os.system(cmd)
+
     if name != 'custom':
         os.remove(f"{gts_path}/gt.mp4")
     os.remove(f"{render_path}/renders.mp4")
@@ -154,7 +159,7 @@ def render_set(model_path, name, iteration, scene, gaussians, pipeline,audio_dir
     os.remove(f"{render_path}/eye.mp4")
     os.remove(f"{render_path}/null.mp4")
     os.remove(f"{render_path}/cam.mp4")
-    
+
 def render_sets(dataset : ModelParams, hyperparam, iteration : int, pipeline : PipelineParams, args):
     skip_train, skip_test, skip_video, batch_size= args.skip_train, args.skip_test, args.skip_video, args.batch
     
@@ -168,7 +173,7 @@ def render_sets(dataset : ModelParams, hyperparam, iteration : int, pipeline : P
         if args.custom_aud != '':
             audio_dir = os.path.join(data_dir, args.custom_wav)
             render_set(dataset.model_path, "custom", scene.loaded_iter, scene.getCustomCameras(), gaussians, pipeline, audio_dir, batch_size)
-        
+
         if not skip_train:
             audio_dir = os.path.join(data_dir, "aud_train.wav")
             render_set(dataset.model_path, "train", scene.loaded_iter, scene.getTrainCameras(), gaussians, pipeline, audio_dir, batch_size)
@@ -220,6 +225,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch", type=int, required=True)
     parser.add_argument("--custom_aud", type=str, default='')
     parser.add_argument("--custom_wav", type=str, default='')
+    parser.add_argument("--result_dir", type=str, default='')
     # parser.add_argument("--audio_dir", type=str)
     args = get_combined_args(parser)
     print("Rendering " , args.model_path)
