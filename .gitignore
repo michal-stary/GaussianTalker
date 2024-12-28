@@ -15,4 +15,6 @@ wandb/
 *.pth
 
 render_orig.py
-
+models
+PublicMM1
+data_utils/face_tracking/3DMM/*
