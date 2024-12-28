@@ -133,6 +133,10 @@ python render.py -s ${YOUR_DATASET_DIR}/${DATASET_NAME} --model_path ${YOUR_MODE
     
 ## Inference with custom audio
 
+Run to obtain audio feature:
+```python data_utils/deepspeech_features/extract_ds_features.py --input new_for_inference.wav```
+
+
 Please locate the files <custom_aud>.wav and <custom_aud>.npy in the following directory path: ${YOUR_DATASET_DIR}/${DATASET_NAME}.
 
 ```bash
